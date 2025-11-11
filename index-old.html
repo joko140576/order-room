@@ -1,1 +1,224 @@
-coba
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Meeting Room</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .btn-loading {
+      position: relative;
+      color: transparent !important;
+    }
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 50%;
+      left: 50%;
+      margin-left: -10px;
+      margin-top: -10px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-right-color: transparent;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .card {
+      border: none;
+      border-radius: 15px;
+    }
+    .table th {
+      background-color: #198754 !important;
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-4">
+  <div class="card shadow-lg p-3 rounded-4">
+    <h4 class="text-center mb-3">📅 Form Pemesanan Ruang Meeting</h4>
+    <form id="orderForm">
+      <div class="mb-3">
+        <label class="form-label">Tanggal Meeting</label>
+        <input type="date" class="form-control" name="tanggal" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nama Pemesan</label>
+        <input type="text" class="form-control" name="nama" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Divisi / Unit</label>
+        <input type="text" class="form-control" name="divisi" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Ruang</label>
+        <select class="form-select" name="ruang" required>
+          <option value="">-- Pilih Ruang --</option>
+          <option>Ruang Lantai 3 - Marotai</option>
+          <option>Ruang Lantai 3 - Natuna</option>
+          <option>Ruang Lantai 2</option>
+          <option>Ruang Lantai 1 - Rote</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label">Jam Mulai</label>
+          <input type="time" class="form-control" name="mulai" required>
+        </div>
+        <div class="col mb-3">
+          <label class="form-label">Jam Akhir</label>
+          <input type="time" class="form-control" name="akhir" required>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Acara</label>
+        <input type="text" class="form-control" name="acara" required>
+      </div>
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-success">Pesan</button>
+        <button type="button" id="lihatData" class="btn btn-outline-primary">Lihat Data</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tabel Data -->
+  <div id="dataTable" class="mt-4" style="display:none;">
+    <h5 class="text-center mb-3">📋 Data Pemesanan Terbaru</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered text-center table-striped" id="tableContent">
+        <thead class="table-success">
+          <tr>
+            <th>Waktu Input</th>
+            <th>Tanggal</th>
+            <th>Nama</th>
+            <th>Divisi</th>
+            <th>Ruang</th>
+            <th>Mulai</th>
+            <th>Akhir</th>
+            <th>Acara</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="responseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-3">
+      <div class="modal-body">
+        <h5>✅ Data sudah tersimpan!</h5>
+        <p>Klik tombol lihat data, mungkin ada jadwal yang bentrok!</p>
+        <button class="btn btn-primary" data-bs-dismiss="modal">Oke</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOAD BOOTSTRAP JS DULU -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Pastikan bootstrap sudah terload sebelum kode ini dijalankan
+document.addEventListener('DOMContentLoaded', function() {
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbwtO8UGhgyzHzf9zpqRYlGFkK63JhbTJFtFq7U1iiLxI9puUEzXltjzUvKejOmSoO2Z3Q/exec'; // GANTI DENGAN URL SCRIPT ANDA
+
+  // Cache element dan modal di awal
+  const orderForm = document.getElementById('orderForm');
+  const lihatDataBtn = document.getElementById('lihatData');
+  const responseModal = new bootstrap.Modal(document.getElementById('responseModal'));
+  const dataTable = document.getElementById('dataTable');
+  const tableBody = document.querySelector('#tableContent tbody');
+
+  // Submit form
+  orderForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    // Loading state
+    submitBtn.textContent = 'Memproses...';
+    submitBtn.disabled = true;
+    
+    try {
+      const formData = new FormData(e.target);
+      const params = new URLSearchParams(formData).toString();
+      
+      // Gunakan Promise.race untuk timeout
+      const fetchPromise = fetch(`${scriptURL}?${params}`);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      );
+      
+      await Promise.race([fetchPromise, timeoutPromise]);
+      
+      // Langsung show modal tanpa delay
+      responseModal.show();
+      e.target.reset();
+      
+    } catch (err) {
+      alert("Gagal menyimpan data: " + (err.message || "Network error"));
+    } finally {
+      // Reset button state
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+
+  // Tombol Lihat Data
+  lihatDataBtn.addEventListener('click', async () => {
+    const originalText = lihatDataBtn.textContent;
+    
+    // Loading state
+    lihatDataBtn.textContent = 'Loading...';
+    lihatDataBtn.disabled = true;
+    
+    try {
+      const sheetUrl = scriptURL + '?read=true';
+      const res = await fetch(sheetUrl);
+      const data = await res.json().catch(() => []);
+      
+      // Optimasi rendering dengan string concatenation
+      let html = '';
+      const latestData = data.slice(-20).reverse();
+      
+      latestData.forEach(row => {
+        // Skip header duplikat
+        if (row[0] === "Waktu Input" && row[1] === "Tanggal Meeting") return;
+        if (row[0] === "Waktu Input        Tanggal Meeting") return;
+        
+        html += `<tr>${row.map(cell => `<td>${cell || '-'}</td>`).join('')}</tr>`;
+      });
+      
+      tableBody.innerHTML = html;
+      dataTable.style.display = 'block';
+      
+      // Scroll ke tabel secara smooth
+      dataTable.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      
+    } catch (err) {
+      alert("Gagal memuat data!");
+    } finally {
+      lihatDataBtn.textContent = originalText;
+      lihatDataBtn.disabled = false;
+    }
+  });
+
+  // Set tanggal minimum ke hari ini
+  document.querySelector('input[name="tanggal"]').min = new Date().toISOString().split('T')[0];
+});
+</script>
+
+</body>
+</html>
+
