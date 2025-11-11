@@ -1,328 +1,145 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pemesanan Ruang Rapat - PT SSI</title>
-
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    :root{
-      --primary:#1565c0;
-      --card-radius:14px;
-    }
-    body{
-      background: linear-gradient(180deg,#f0f6ff 0%, #eaf2ff 100%);
-      min-height:100vh;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      padding:20px;
-    }
-    .app {
-      max-width: 720px;
-      margin: 0 auto;
-    }
-    .card-main {
-      border-radius: var(--card-radius);
-      box-shadow: 0 8px 28px rgba(12, 32, 63, 0.08);
-      overflow: hidden;
-    }
-    .header {
-      background: linear-gradient(90deg,var(--primary),#1976d2);
-      color: white;
-      padding: 18px 20px;
-    }
-    .header h1{font-size:18px;margin:0;font-weight:600}
-    .form-section { padding: 18px 20px; }
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid rgba(21,101,192,0.12);
-    }
-    .table-scroll { max-height: 380px; overflow:auto; }
-    @media (max-width:420px){
-      .header h1{font-size:16px}
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Meeting Room - PT SSI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-  <div class="app">
-    <div class="card card-main">
-      <div class="header d-flex align-items-center justify-content-between">
-        <div>
-          <h1>📅 Pemesanan Meeting Room</h1>
-          <div style="font-size:12px;opacity:.9">PT SSI — Sistem booking sederhana</div>
-        </div>
-        <div style="font-size:12px;opacity:.95">Mobile friendly</div>
+<body class="bg-light">
+
+<div class="container py-4">
+  <h4 class="text-center mb-4">Form Pemesanan Ruang Rapat</h4>
+  
+  <form id="orderForm" class="card p-3 shadow-sm">
+    <div class="mb-3">
+      <label class="form-label">Nama Pemesan</label>
+      <input type="text" class="form-control" name="nama" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Divisi / Unit</label>
+      <input type="text" class="form-control" name="divisi" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Ruang</label>
+      <select class="form-select" name="ruang" required>
+        <option value="">Pilih Ruang</option>
+        <option>Ruang Lt 3 - Marotai</option>
+        <option>Ruang Lt 3 - Natuna</option>
+        <option>Ruang Lt 2</option>
+        <option>Ruang Lt 1 - Rote</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="col-6 mb-3">
+        <label class="form-label">Jam Mulai</label>
+        <input type="time" class="form-control" name="jamMulai" required>
       </div>
-
-      <div class="form-section">
-        <form id="orderForm" autocomplete="off">
-          <div class="mb-2">
-            <label class="form-label small">Nama Pemesan</label>
-            <input id="nama" class="form-control" required placeholder="Nama lengkap"/>
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label small">Divisi / Unit</label>
-            <input id="divisi" class="form-control" required placeholder="Contoh: HRD / Finance"/>
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label small">Ruang</label>
-            <select id="ruang" class="form-select" required>
-              <option value="">-- Pilih Ruangan --</option>
-              <option>Ruang Lantai 3 - Marotai</option>
-              <option>Ruang Lantai 3 - Natuna</option>
-              <option>Ruang Lantai 2</option>
-              <option>Ruang Lantai 1 - Rote</option>
-            </select>
-          </div>
-
-          <div class="row g-2 mb-2">
-            <div class="col-6">
-              <label class="form-label small">Jam Mulai</label>
-              <input id="jamMulai" type="time" class="form-control" required>
-            </div>
-            <div class="col-6">
-              <label class="form-label small">Jam Akhir</label>
-              <input id="jamAkhir" type="time" class="form-control" required>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label small">Acara</label>
-            <textarea id="acara" rows="2" class="form-control" placeholder="Contoh: Rapat koordinasi" required></textarea>
-          </div>
-
-          <div class="d-grid gap-2">
-            <button id="submitBtn" type="submit" class="btn btn-primary btn-lg">Pesan Ruangan</button>
-            <div class="d-flex gap-2">
-              <button id="lihatBtn" type="button" class="btn btn-outline-primary flex-fill">Lihat Data (20 terbaru)</button>
-              <button id="refreshBtn" type="button" class="btn btn-ghost flex-fill">Refresh</button>
-            </div>
-          </div>
-        </form>
+      <div class="col-6 mb-3">
+        <label class="form-label">Jam Akhir</label>
+        <input type="time" class="form-control" name="jamAkhir" required>
       </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Acara</label>
+      <textarea class="form-control" name="acara" rows="2" required></textarea>
+    </div>
 
-      <div class="p-3 border-top bg-white">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <div><strong>Jadwal Terbaru</strong> <small class="text-muted">20 data</small></div>
-          <div id="lastUpdated" class="small text-muted">—</div>
-        </div>
+    <button type="submit" class="btn btn-success w-100 mb-2">Pesan</button>
+    <button type="button" class="btn btn-outline-primary w-100" id="lihatData">Lihat Data</button>
+  </form>
 
-        <div id="tableArea" class="table-scroll" style="display:none">
-          <table class="table table-sm table-hover mb-0">
-            <thead class="table-light small">
-              <tr>
-                <th style="min-width:140px">Timestamp</th>
-                <th>Nama</th>
-                <th class="text-nowrap">Divisi</th>
-                <th>Ruang</th>
-                <th class="text-nowrap">Jam Mulai</th>
-                <th class="text-nowrap">Jam Akhir</th>
-                <th>Acara</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody" class="small"></tbody>
-          </table>
-        </div>
+  <div id="dataTable" class="mt-4 d-none">
+    <h5 class="mb-3 text-center">20 Jadwal Terbaru</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped small text-center">
+        <thead class="table-light">
+          <tr>
+            <th>Waktu</th>
+            <th>Nama</th>
+            <th>Divisi</th>
+            <th>Ruang</th>
+            <th>Mulai</th>
+            <th>Akhir</th>
+            <th>Acara</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-        <div id="emptyArea" class="text-center text-muted py-3">Klik "Lihat Data" untuk memuat jadwal.</div>
+<!-- Modal -->
+<div class="modal fade" id="responseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <p id="modalMessage"></p>
+        <button class="btn btn-primary" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal -->
-  <div class="modal fade" id="modalResponse" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-body text-center p-3">
-          <h6 id="modalTitle" class="mb-2"></h6>
-          <div id="modalText" class="mb-3 small"></div>
-          <div class="d-flex justify-content-center">
-            <button class="btn btn-primary" data-bs-dismiss="modal">Tutup</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycby8fr5S5k4WQDe_u06qzBfNGdPeI_hRpvQM9PuvcTQEI9gDx22sntUOlcqRbOMfSHxYiA/exec"; // GANTI DENGAN URL WEB APP KAMU
 
-  <!-- Spinner for buttons (hidden) -->
-  <template id="spinnerTpl">
-    <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
-  </template>
+document.getElementById("orderForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form).entries());
 
-  <script>
-    // ======= CONFIG: ganti dengan URL Web App Apps Script kamu =======
-    const SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby8fr5S5k4WQDe_u06qzBfNGdPeI_hRpvQM9PuvcTQEI9gDx22sntUOlcqRbOMfSHxYiA/exec";
-    // ==================================================================
-
-    // Elements
-    const orderForm = document.getElementById('orderForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const lihatBtn = document.getElementById('lihatBtn');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const tableArea = document.getElementById('tableArea');
-    const tableBody = document.getElementById('tableBody');
-    const emptyArea = document.getElementById('emptyArea');
-    const lastUpdated = document.getElementById('lastUpdated');
-    const modal = new bootstrap.Modal(document.getElementById('modalResponse'));
-    const modalTitle = document.getElementById('modalTitle');
-    const modalText = document.getElementById('modalText');
-    const spinnerTpl = document.getElementById('spinnerTpl').content.firstElementChild;
-
-    // Helper: show modal
-    function showModal(title, text) {
-      modalTitle.innerText = title;
-      modalText.innerHTML = text;
-      modal.show();
-    }
-
-    // Helper: format timestamp
-    function fmt(ts) {
-      try {
-        const d = new Date(ts);
-        if (isNaN(d)) return ts;
-        return d.toLocaleString('id-ID', {hour12:false});
-      } catch { return ts; }
-    }
-
-    // Submit form -> POST
-    orderForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      // disable
-      submitBtn.disabled = true;
-      const spinner = spinnerTpl.cloneNode(true);
-      submitBtn.appendChild(spinner);
-
-      const payload = {
-        nama: document.getElementById('nama').value.trim(),
-        divisi: document.getElementById('divisi').value.trim(),
-        ruang: document.getElementById('ruang').value,
-        jamMulai: document.getElementById('jamMulai').value,
-        jamAkhir: document.getElementById('jamAkhir').value,
-        acara: document.getElementById('acara').value.trim()
-      };
-
-      try {
-        const res = await fetch(SCRIPT_WEB_APP_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        // Jika server mengembalikan non-JSON (mis. scripts error), ini akan throw
-        const json = await res.json();
-
-        if (json.result === 'success') {
-          showModal('✅ Berhasil', 'Data pemesanan berhasil disimpan.');
-          orderForm.reset();
-          // otomatis refresh tabel bila sudah terbuka
-          if (tableArea.style.display === 'block') {
-            await loadLatest();
-          }
-        } else if (json.result === 'conflict') {
-          const txt = `Ruangan <strong>${json.ruang}</strong> sudah dipesan pada jam <strong>${json.jamMulai}</strong> - <strong>${json.jamAkhir}</strong>. Silakan pilih jam/ruang lain.`;
-          showModal('⚠️ Jadwal Bentrok', txt);
-        } else {
-          showModal('❌ Gagal', 'Server mengembalikan error. Cek console untuk detail.');
-          console.error('Unknown response:', json);
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
-        showModal('🚫 Koneksi Gagal', 'Tidak dapat terhubung ke server. Pastikan Apps Script sudah dideploy dan mengizinkan CORS.');
-      } finally {
-        // restore button
-        submitBtn.disabled = false;
-        if (submitBtn.contains(spinner)) submitBtn.removeChild(spinner);
-      }
+  try {
+    const res = await fetch(scriptURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
 
-    // Load latest 20 -> GET
-    async function loadLatest() {
-      // show loading
-      lihatBtn.disabled = true;
-      refreshBtn.disabled = true;
-      lihatBtn.appendChild(spinnerTpl.cloneNode(true));
-      tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-3">Memuat data...</td></tr>`;
-      emptyArea.style.display = 'none';
-      tableArea.style.display = 'block';
-
-      try {
-        const res = await fetch(SCRIPT_WEB_APP_URL, { method: 'GET' });
-        const data = await res.json();
-
-        if (!Array.isArray(data) || data.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Tidak ada data.</td></tr>`;
-        } else {
-          tableBody.innerHTML = '';
-          data.forEach(row => {
-            const tr = document.createElement('tr');
-
-            const tstamp = row.timestamp ?? row.Timestamp ?? row[0] ?? '';
-            const nama = row.nama ?? row.Nama ?? row[1] ?? '';
-            const divisi = row.divisi ?? row.Divisi ?? row[2] ?? '';
-            const ruang = row.ruang ?? row.Ruang ?? row[3] ?? '';
-            const jamMulai = row.jamMulai ?? row['Jam Mulai'] ?? row[4] ?? '';
-            const jamAkhir = row.jamAkhir ?? row['Jam Akhir'] ?? row[5] ?? '';
-            const acara = row.acara ?? row.Acara ?? row[6] ?? '';
-
-            tr.innerHTML = `
-              <td style="min-width:140px">${fmt(tstamp)}</td>
-              <td>${escapeHtml(nama)}</td>
-              <td>${escapeHtml(divisi)}</td>
-              <td>${escapeHtml(ruang)}</td>
-              <td class="text-nowrap">${escapeHtml(jamMulai)}</td>
-              <td class="text-nowrap">${escapeHtml(jamAkhir)}</td>
-              <td>${escapeHtml(acara)}</td>
-            `;
-            tableBody.appendChild(tr);
-          });
-        }
-        lastUpdated.innerText = new Date().toLocaleTimeString('id-ID', {hour12:false});
-      } catch (err) {
-        console.error('Load latest error:', err);
-        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-3">Gagal memuat data.</td></tr>`;
-        lastUpdated.innerText = 'error';
-      } finally {
-        // restore buttons
-        lihatBtn.disabled = false;
-        refreshBtn.disabled = false;
-        const sp = lihatBtn.querySelector('.spinner-border');
-        if (sp) sp.remove();
-      }
+    const result = await res.json();
+    if (result.result === "success") {
+      document.getElementById("modalMessage").textContent =
+        "Data sudah tersimpan! Klik 'Lihat Data' untuk memastikan tidak bentrok.";
+      new bootstrap.Modal(document.getElementById("responseModal")).show();
+      form.reset();
+    } else {
+      alert("Gagal menyimpan data: " + result.message);
     }
+  } catch (err) {
+    alert("Terjadi kesalahan koneksi: " + err);
+  }
+});
 
-    // Escape HTML to avoid injection in table
-    function escapeHtml(s) {
-      if (s === null || s === undefined) return '';
-      return String(s)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
+document.getElementById("lihatData").addEventListener("click", async () => {
+  try {
+    const res = await fetch(scriptURL);
+    const data = await res.json();
 
-    // Buttons
-    lihatBtn.addEventListener('click', async () => {
-      await loadLatest();
-    });
-    refreshBtn.addEventListener('click', async () => {
-      if (tableArea.style.display === 'block') {
-        await loadLatest();
-      } else {
-        showModal('ℹ️ Info', 'Tekan "Lihat Data" terlebih dahulu untuk memuat jadwal.');
-      }
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row.waktu}</td>
+        <td>${row.nama}</td>
+        <td>${row.divisi}</td>
+        <td>${row.ruang}</td>
+        <td>${row.jamMulai}</td>
+        <td>${row.jamAkhir}</td>
+        <td>${row.acara}</td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    // Optional: auto-load on page open
-    // window.addEventListener('load', () => { loadLatest(); });
+    document.getElementById("dataTable").classList.remove("d-none");
+  } catch (err) {
+    alert("Gagal memuat data: " + err);
+  }
+});
+</script>
 
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
