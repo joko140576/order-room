@@ -1,33 +1,129 @@
-function doPost(e) {
-  const ss = SpreadsheetApp.openById("19Y_GyqG6dTAko-1zfkX1nnIYf_L3WsVLxuMNe0EcDAg"); // ID sheet kamu
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
 
-  // Tambahkan header jika belum ada
+  // Buat header jika sheet baru
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["Timestamp", "Nama", "Divisi", "Ruang", "Jam Mulai", "Jam Selesai", "Acara"]);
+    sheet.getRange(1, 1, 1, 8).setValues([[
+      "Waktu Input", 
+      "Tanggal Meeting", 
+      "Nama Pemesan", 
+      "Divisi/Unit", 
+      "Ruang", 
+      "Jam Mulai", 
+      "Jam Akhir", 
+      "Acara"
+    ]]);
+    
+    // Set lebar kolom agar rapi
+    sheet.setColumnWidths(1, 8, 120);
   }
 
-  const nama = e.parameter.nama || "";
-  const divisi = e.parameter.divisi || "";
-  const ruang = e.parameter.ruang || "";
-  const jamMulai = e.parameter.jamMulai || "";
-  const jamSelesai = e.parameter.jamSelesai || "";
-  const acara = e.parameter.acara || "";
+  const cache = CacheService.getScriptCache();
 
-  sheet.appendRow([new Date(), nama, divisi, ruang, jamMulai, jamSelesai, acara]);
+  // BACA DATA
+  if (e.parameter.read == "true") {
+    const cacheKey = 'meeting_data_cache';
+    let cachedData = cache.get(cacheKey);
+    
+    if (cachedData) {
+      return ContentService
+        .createTextOutput(cachedData)
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    
+    // FILTER: Hanya ambil data yang valid
+    const filteredData = data.filter((row, index) => {
+      if (index === 0) return true;
+      if (row[0] === "Waktu Input" || row[0] === "Waktu Input        Tanggal Meeting") return false;
+      if (!row[1] && !row[2] && !row[3]) return false;
+      return true;
+    });
+    
+    // Format data sebelum dikirim
+    const formattedData = filteredData.map((row, index) => {
+      if (index === 0) return row;
+      
+      const formattedRow = [...row];
+      
+      // Format Waktu Input
+      if (formattedRow[0] instanceof Date) {
+        formattedRow[0] = Utilities.formatDate(formattedRow[0], Session.getScriptTimeZone(), 'dd-MM-yyyy HH:mm');
+      }
+      
+      // 🔥 PERBAIKAN: Format Tanggal Meeting - handle semua kemungkinan format
+      if (formattedRow[1] instanceof Date) {
+        // Jika sudah Date object, format ke dd-MM-yyyy
+        formattedRow[1] = Utilities.formatDate(formattedRow[1], Session.getScriptTimeZone(), 'dd-MM-yyyy');
+      } else if (typeof formattedRow[1] === 'string') {
+        if (formattedRow[1].match(/^\d{4}-\d{2}-\d{2}$/)) {
+          // Format: 2025-11-12 -> 12-11-2025
+          const parts = formattedRow[1].split('-');
+          formattedRow[1] = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        } else if (formattedRow[1].includes('T')) {
+          // Format: 2025-11-11T17:00:00.000Z -> 11-11-2025
+          const date = new Date(formattedRow[1]);
+          formattedRow[1] = Utilities.formatDate(date, Session.getScriptTimeZone(), 'dd-MM-yyyy');
+        }
+        // Jika sudah format dd-MM-yyyy, biarkan saja
+      }
+      
+      // Format Jam
+      [5, 6].forEach(col => {
+        if (formattedRow[col] instanceof Date) {
+          formattedRow[col] = Utilities.formatDate(formattedRow[col], Session.getScriptTimeZone(), 'HH:mm');
+        } else if (typeof formattedRow[col] === 'string' && formattedRow[col].includes('T')) {
+          const time = new Date(formattedRow[col]);
+          formattedRow[col] = Utilities.formatDate(time, Session.getScriptTimeZone(), 'HH:mm');
+        } else if (typeof formattedRow[col] === 'string') {
+          formattedRow[col] = formattedRow[col].substring(0, 5);
+        }
+      });
+      
+      return formattedRow;
+    });
+    
+    const jsonData = JSON.stringify(formattedData);
+    cache.put(cacheKey, jsonData, 30);
+    
+    return ContentService
+      .createTextOutput(jsonData)
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 
-  // kirim respon agar browser tahu ini aman untuk CORS
-  return ContentService
-    .createTextOutput(JSON.stringify({ result: "success" }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader("Access-Control-Allow-Origin", "*")
-    .setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-    .setHeader("Access-Control-Allow-Headers", "Content-Type");
-}
+  // SIMPAN DATA BARU
+  cache.remove('meeting_data_cache');
 
-function doGet(e) {
+  // 🔥 PERBAIKAN: Simpan tanggal sebagai STRING format DD-MM-YYYY langsung
+  const tanggalInput = e.parameter.tanggal || "";
+  let tanggalFormatted = "";
+  
+  if (tanggalInput) {
+    // Input dari HTML: YYYY-MM-DD -> Convert ke DD-MM-YYYY
+    const parts = tanggalInput.split('-');
+    if (parts.length === 3) {
+      tanggalFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    } else {
+      tanggalFormatted = tanggalInput; // Fallback
+    }
+  }
+
+  const row = [
+    new Date(),                             // Kolom A: Waktu Input (tetap Date)
+    tanggalFormatted,                       // Kolom B: Tanggal Meeting (STRING dd-mm-yyyy)
+    e.parameter.nama || "",                 // Kolom C: Nama Pemesan
+    e.parameter.divisi || "",               // Kolom D: Divisi/Unit
+    e.parameter.ruang || "",                // Kolom E: Ruang
+    e.parameter.mulai || "",                // Kolom F: Jam Mulai
+    e.parameter.akhir || "",                // Kolom G: Jam Akhir
+    e.parameter.acara || ""                 // Kolom H: Acara
+  ];
+
+  sheet.appendRow(row);
+
   return ContentService
     .createTextOutput("OK")
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeader("Access-Control-Allow-Origin", "*");
+    .setMimeType(ContentService.MimeType.TEXT);
 }
