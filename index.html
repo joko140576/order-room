@@ -2,129 +2,123 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Order Meeting Room - PT SSI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pemesanan Ruang Rapat - PT SSI</title>
 
   <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
 
   <style>
     body {
-      background-color: #f6f9fc;
-      font-family: 'Segoe UI', sans-serif;
-      padding-bottom: 100px;
+      background: linear-gradient(120deg, #e3f2fd, #bbdefb);
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+      padding-top: 40px;
+    }
+    .container {
+      max-width: 600px;
     }
     .card {
-      border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
-    .btn {
-      border-radius: 0.6rem;
+    .btn-primary {
+      background-color: #1976d2;
+      border: none;
+      font-weight: 500;
     }
-    .table-container {
-      display: none;
-      margin-top: 20px;
+    .btn-primary:hover {
+      background-color: #1565c0;
+    }
+    .modal-content {
+      border-radius: 15px;
     }
   </style>
 </head>
+
 <body>
-  <div class="container mt-4">
+  <div class="container">
     <div class="card p-4">
-      <h4 class="text-center mb-3">📅 Form Pemesanan Meeting Room</h4>
+      <h3 class="text-center mb-4 text-primary fw-bold">Form Pemesanan Ruang Rapat</h3>
+
       <form id="orderForm">
         <div class="mb-3">
           <label class="form-label">Nama Pemesan</label>
-          <input type="text" class="form-control" id="nama" placeholder="Masukkan nama" required>
+          <input type="text" name="nama" class="form-control" required />
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Divisi / Unit</label>
-          <input type="text" class="form-control" id="divisi" placeholder="Masukkan divisi atau unit kerja" required>
+          <label class="form-label">Divisi</label>
+          <input type="text" name="divisi" class="form-control" required />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Ruang</label>
-          <select class="form-select" id="ruang" required>
-            <option value="">-- Pilih Ruangan --</option>
-            <option>Ruang Lantai 3 - Marotai</option>
-            <option>Ruang Lantai 3 - Natuna</option>
-            <option>Ruang Lantai 2</option>
-            <option>Ruang Lantai 1 - Rote</option>
+          <select name="ruang" class="form-select" required>
+            <option value="">Pilih Ruangan...</option>
+            <option>Ruang Rapat 1</option>
+            <option>Ruang Rapat 2</option>
+            <option>Ruang Rapat 3</option>
           </select>
         </div>
 
-        <div class="row">
-          <div class="col-6 mb-3">
-            <label class="form-label">Jam Mulai</label>
-            <input type="time" class="form-control" id="jamMulai" required>
-          </div>
-          <div class="col-6 mb-3">
-            <label class="form-label">Jam Akhir</label>
-            <input type="time" class="form-control" id="jamAkhir" required>
-          </div>
+        <div class="mb-3">
+          <label class="form-label">Jam Mulai</label>
+          <input type="time" name="jamMulai" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Jam Akhir</label>
+          <input type="time" name="jamAkhir" class="form-control" required />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Acara</label>
-          <textarea class="form-control" id="acara" rows="2" placeholder="Tuliskan kegiatan atau acara" required></textarea>
+          <textarea name="acara" class="form-control" rows="3" required></textarea>
         </div>
 
-        <div class="d-grid gap-2">
-          <button type="submit" class="btn btn-success">Pesan Ruangan</button>
-          <button type="button" class="btn btn-primary" id="lihatDataBtn">Lihat Data</button>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary btn-lg">Pesan Ruangan</button>
         </div>
       </form>
-
-      <div class="table-container mt-4" id="tableContainer">
-        <h5 class="mb-3 text-center">📋 Jadwal Terbaru (20 Data Terakhir)</h5>
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered" id="dataTable">
-            <thead class="table-success text-center">
-              <tr>
-                <th>Timestamp</th>
-                <th>Nama</th>
-                <th>Divisi</th>
-                <th>Ruang</th>
-                <th>Jam Mulai</th>
-                <th>Jam Akhir</th>
-                <th>Acara</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
     </div>
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content text-center p-3">
-        <h5>✅ Data sudah tersimpan</h5>
-        <p class="mt-2 mb-3">Klik tombol <b>Lihat Data</b>, mungkin ada jadwal yang bentrok!</p>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      <div class="modal-content text-center p-4">
+        <h5 id="responseModalLabel" class="fw-bold text-primary"></h5>
+        <p id="responseMessage" class="mt-3"></p>
+        <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">Tutup</button>
       </div>
     </div>
   </div>
 
-  <!-- Bootstrap Bundle JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwAuBxSW24S2fh-Vcyw3Dgy0wNtuP35R8N3GsQH1Uc_28WLcIeDVV0G7d04usfy39lCnw/exec"; // 🔧 Ganti dengan URL Google Apps Script kamu
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwFryvWKdCE4AJX5AcJCZW46RutQ93mKr1FB1Te383ywRPH4mHgyOyQeUPbS71_bWT9ow/exec";
 
-    // Handle form submit
-    document.getElementById("orderForm").addEventListener("submit", async (e) => {
+    const form = document.getElementById("orderForm");
+    const responseModal = new bootstrap.Modal(document.getElementById("responseModal"));
+    const responseTitle = document.getElementById("responseModalLabel");
+    const responseMsg = document.getElementById("responseMessage");
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const data = {
-        nama: document.getElementById("nama").value,
-        divisi: document.getElementById("divisi").value,
-        ruang: document.getElementById("ruang").value,
-        jamMulai: document.getElementById("jamMulai").value,
-        jamAkhir: document.getElementById("jamAkhir").value,
-        acara: document.getElementById("acara").value
+        nama: form.nama.value,
+        divisi: form.divisi.value,
+        ruang: form.ruang.value,
+        jamMulai: form.jamMulai.value,
+        jamAkhir: form.jamAkhir.value,
+        acara: form.acara.value
       };
 
       try {
@@ -136,55 +130,25 @@
 
         const result = await res.json();
 
-        if (result.result === "conflict") {
-          showModal(
-            "⚠️ Jadwal Bentrok!",
-            `Ruangan <b>${result.ruang}</b> sudah terpakai antara <b>${result.jamMulai}</b> - <b>${result.jamAkhir}</b>.`
-          );
-        } else if (result.result === "success") {
-          document.getElementById("orderForm").reset();
-          showModal("✅ Data sudah tersimpan", "Klik tombol <b>Lihat Data</b>, mungkin ada jadwal yang bentrok!");
+        if (result.result === "success") {
+          responseTitle.textContent = "✅ Terima Kasih!";
+          responseMsg.textContent = "Data pemesanan Anda telah tersimpan.";
+          form.reset();
+        } else if (result.result === "conflict") {
+          responseTitle.textContent = "⚠️ Jadwal Bentrok!";
+          responseMsg.textContent = `Ruang ${result.ruang} sudah dipesan pada jam ${result.jamMulai} - ${result.jamAkhir}.`;
         } else {
-          alert("Gagal menyimpan data.");
+          responseTitle.textContent = "❌ Gagal";
+          responseMsg.textContent = "Terjadi kesalahan tak terduga.";
         }
+
+        responseModal.show();
+
       } catch (error) {
-        alert("Gagal menyimpan data: " + error.message);
-      }
-    });
-
-    // Menampilkan modal dengan pesan dinamis
-    function showModal(title, message) {
-      document.querySelector("#successModal h5").innerHTML = title;
-      document.querySelector("#successModal p").innerHTML = message;
-      const modal = new bootstrap.Modal(document.getElementById("successModal"));
-      modal.show();
-    }
-
-    // Tombol Lihat Data
-    document.getElementById("lihatDataBtn").addEventListener("click", async () => {
-      const container = document.getElementById("tableContainer");
-      const tbody = document.querySelector("#dataTable tbody");
-      tbody.innerHTML = "<tr><td colspan='7' class='text-center'>Memuat data...</td></tr>";
-
-      try {
-        const res = await fetch(scriptURL + "?read=true");
-        const data = await res.json();
-        tbody.innerHTML = "";
-        data.reverse().forEach(row => {
-          const tr = `<tr>
-            <td>${new Date(row.Timestamp).toLocaleString()}</td>
-            <td>${row.Nama || row.nama || ""}</td>
-            <td>${row.Divisi || row.divisi || ""}</td>
-            <td>${row.Ruang || row.ruang || ""}</td>
-            <td>${row["Jam Mulai"] || row.jamMulai || ""}</td>
-            <td>${row["Jam Akhir"] || row.jamAkhir || ""}</td>
-            <td>${row.Acara || row.acara || ""}</td>
-          </tr>`;
-          tbody.innerHTML += tr;
-        });
-        container.style.display = "block";
-      } catch (error) {
-        tbody.innerHTML = "<tr><td colspan='7' class='text-center text-danger'>Gagal memuat data</td></tr>";
+        console.error("Error:", error);
+        responseTitle.textContent = "🚫 Koneksi Gagal";
+        responseMsg.textContent = "Tidak dapat terhubung ke server. Periksa kembali koneksi atau izin akses Apps Script.";
+        responseModal.show();
       }
     });
   </script>
